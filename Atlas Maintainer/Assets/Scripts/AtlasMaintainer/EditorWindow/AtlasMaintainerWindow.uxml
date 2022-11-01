@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:GroupBox style="flex-shrink: 1; flex-grow: 1; flex-direction: row; justify-content: center; max-height: none; max-width: none;">
+        <ui:VisualElement name="DragAndDropArea" style="width: 33%; justify-content: flex-start;">
+            <ui:Label text="Label" display-tooltip-when-elided="true" />
+        </ui:VisualElement>
+        <ui:VisualElement name="AtlasesArea" style="width: 33%; justify-content: flex-start;">
+            <ui:Label text="Label" display-tooltip-when-elided="true" />
+        </ui:VisualElement>
+        <ui:VisualElement name="OperationsArea" style="width: 33%;">
+            <ui:Label text="Label" display-tooltip-when-elided="true" />
+        </ui:VisualElement>
+    </ui:GroupBox>
+</ui:UXML>
