@@ -1,86 +1,26 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.U2D;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.U2D;
-using UnityEngine.UI;
+using Image = UnityEngine.UI.Image;
 
-public class AtlasMaintainer : Editor
+public static class AtlasMaintainerHelpers
 {
-#region From Sprite
-
-    [MenuItem("Assets/Atlas Maintainer/Find/Atlases For Sprite", true)]
-    private static bool ValidateSpriteToSearchInAtlases()
-    {
-        return ValidateSprite(Selection.activeObject);
-    }
+#region Find Functions
     
-    [MenuItem("Assets/Atlas Maintainer/Find/Atlases For Sprite")]
     private static void FindAtlasesForSprite()
     {
-        SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
-        
         Texture2D targetTexture = Selection.activeObject as Texture2D;
-        Sprite cloneInAtlas = null;
 
-        if (!TryGetAllAtlases(out SpriteAtlas[] atlases))
-        {
-            Debug.LogWarning("No atlas found in the project!");
-            return;
-        }
-        
-        for (int i = 0; i < atlases.Length; i++)
-        {
-            cloneInAtlas = atlases[i].GetSprite(targetTexture.name);
-            if (!cloneInAtlas)
-                continue;
-            
-            Debug.Log($"{atlases[i].name} includes the {targetTexture.name} sprite");
-            break;
-        }
-        
-        if (cloneInAtlas)
-            return;
-        
-        Debug.LogWarning($"Atlas Could not found for sprite {targetTexture.name}");
-    }
-
-#endregion
-
-#region From Prefab
-
-    [MenuItem("Assets/Atlas Maintainer/Find/Atlases For Prefab", true)]
-    private static bool ValidatePrefab()
-    {
-        GameObject targetGameObject = Selection.activeObject as GameObject;
-        if (!targetGameObject)
-            return false;
-
-        PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(targetGameObject);
-        if (prefabAssetType != PrefabAssetType.Regular
-            && prefabAssetType != PrefabAssetType.Variant)
-            return false;
-
-        return TryGetAllDrawersInContainer(targetGameObject, out IContainerFunctions[] _);
+        SearchSpriteFromAtlases(targetTexture.name);
     }
     
-    [MenuItem("Assets/Atlas Maintainer/Find/Atlases For Prefab")]
     private static void FindAtlasesForPrefab()
     {
-        SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
-
         GameObject targetGameObject = Selection.activeObject as GameObject;
-        Sprite cloneInAtlas = null;
-
-        if (!TryGetAllAtlases(out SpriteAtlas[] atlases))
-        {
-            Debug.LogWarning("No atlas found in the project!");
-            return;
-        }
 
         TryGetAllDrawersInContainer(targetGameObject, out IContainerFunctions[] wrappedDrawers);
 
@@ -88,22 +28,13 @@ public class AtlasMaintainer : Editor
         {
             IContainerFunctions target = wrappedDrawers[i];
             
-            for (int j = 0; j < atlases.Length; j++)
-            {
-                cloneInAtlas = atlases[j].GetSprite(target.GetSpriteName());
-                if (!cloneInAtlas)
-                    continue;
-            
-                Debug.Log($"{atlases[j].name} includes the {target.GetSpriteName()} sprite");
-                break;
-            }
-            
-            if (cloneInAtlas)
-                continue;
-        
-            Debug.LogWarning($"Atlas Could not found for sprite {target.GetSpriteName()}");
+            SearchSpriteFromAtlases(target.GetSpriteName());
         }
     }
+
+#endregion
+
+#region Prefab Helpers
     
     private interface IContainerFunctions
     {
@@ -169,7 +100,7 @@ public class AtlasMaintainer : Editor
 
 #endregion
 
-#region Edit
+#region Edit Functions
 
     [MenuItem("Assets/Atlas Maintainer/Edit/Create new atlas")]
     private static void CreateAtlas()
@@ -200,7 +131,7 @@ public class AtlasMaintainer : Editor
 
 #endregion
 
-#region Add & Remove
+#region Add & Remove Functions
 
     [MenuItem("Assets/Atlas Maintainer/Edit/Add Asset to atlas")]
     private static void AddAssetToAtlas()
@@ -296,7 +227,41 @@ public class AtlasMaintainer : Editor
 
 #endregion
 
-    private static bool TryGetAllAtlases(out SpriteAtlas[] atlases)
+    /// <summary>
+    /// Searches for a given sprite name in the given atlases or all the atlases in the project if no atlas is provided.
+    /// </summary>
+    /// <param name="spriteName">sprite name to search</param>
+    /// <param name="candidateAtlases">Atlases to search for</param>
+    private static void SearchSpriteFromAtlases(string spriteName, SpriteAtlas[] candidateAtlases = null)
+    {
+        SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
+        Sprite cloneInAtlas = null;
+    
+        if (candidateAtlases == null)
+            TryGetAllAtlases(out candidateAtlases);
+            
+        if (candidateAtlases == null)
+        {
+            Debug.LogWarning("No atlas found in the project!");
+            return;
+        }
+            
+        for (int i = 0; i < candidateAtlases.Length; i++)
+        {
+            cloneInAtlas = candidateAtlases[i].GetSprite(spriteName);
+            if (!cloneInAtlas)
+                continue;
+                
+            Debug.Log($"{candidateAtlases[i].name} includes the {spriteName} sprite");
+            break;
+        }
+            
+        if (cloneInAtlas)
+            return;
+            
+        Debug.LogWarning($"Atlas Could not found for sprite {spriteName}");
+    }
+    public static bool TryGetAllAtlases(out SpriteAtlas[] atlases)
     {
         string[] atlasPaths = AssetDatabase.FindAssets("t:SpriteAtlas");
         atlases = new SpriteAtlas[atlasPaths.Length];
@@ -313,7 +278,7 @@ public class AtlasMaintainer : Editor
         return true;
     }
     
-    private static bool ValidateSprite(Object targetObject)
+    public static bool ValidateSprite(Object targetObject)
     {
         if (!ValidateTexture(targetObject))
             return false;
@@ -331,8 +296,22 @@ public class AtlasMaintainer : Editor
     {
         return targetObject is Texture2D;
     }
+    
+    public static bool ValidatePrefab(Object targetObject)
+    {
+        GameObject targetGameObject = targetObject as GameObject;
+        if (!targetGameObject)
+            return false;
 
-    private static bool TryGetSprite(Object targetObject, out Sprite[] sprites)
+        PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(targetGameObject);
+        if (prefabAssetType != PrefabAssetType.Regular
+            && prefabAssetType != PrefabAssetType.Variant)
+            return false;
+
+        return TryGetAllDrawersInContainer(targetGameObject, out IContainerFunctions[] _);
+    }
+
+    public static bool TryGetSprite(Object targetObject, out Sprite[] sprites)
     {
         sprites = new Sprite[] { };
         

@@ -1,13 +1,23 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <ui:GroupBox style="flex-shrink: 1; flex-grow: 1; flex-direction: row; justify-content: center; max-height: none; max-width: none;">
-        <ui:VisualElement name="DragAndDropArea" style="width: 33%; justify-content: flex-start;">
-            <ui:Label text="Label" display-tooltip-when-elided="true" />
+    <ui:GroupBox style="flex-shrink: 1; flex-grow: 1; flex-direction: row; justify-content: center; max-height: none; max-width: none; margin-bottom: 0; margin-top: 0; margin-right: 0; margin-left: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+        <ui:VisualElement name="DragAndDropArea" style="width: 35%; justify-content: flex-start; flex-grow: 0.33; height: initial; flex-shrink: 1; border-left-width: 0; border-right-width: 5px; border-top-width: 0; border-bottom-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); padding-right: 5px;">
+            <ui:Label text="Assets" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 20px;" />
+            <ui:ListView focusable="true" name="DragAndDropListView" selection-type="Multiple" virtualization-method="DynamicHeight" style="min-height: auto; flex-grow: 1;" />
         </ui:VisualElement>
-        <ui:VisualElement name="AtlasesArea" style="width: 33%; justify-content: flex-start;">
-            <ui:Label text="Label" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="AtlasesArea" style="width: 30%; justify-content: flex-start; flex-grow: 0.33; height: initial; flex-shrink: 1; border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); border-right-width: 5px; border-left-width: 0; margin-left: 5px; margin-right: 0; padding-right: 5px;">
+            <ui:VisualElement name="Header" style="height: auto; flex-direction: row; justify-content: space-between; min-height: auto; flex-shrink: 1; opacity: 1; flex-grow: 0;">
+                <ui:Label text="Atlases" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 20px; flex-shrink: 1; flex-grow: 1;" />
+                <ui:Toggle label="Show All" style="flex-shrink: 1; width: auto; align-items: center; justify-content: space-between; flex-grow: 0;" />
+            </ui:VisualElement>
+            <ui:ListView focusable="true" name="AtlasesListView" selection-type="Multiple" virtualization-method="DynamicHeight" show-add-remove-footer="false" reorderable="false" show-bound-collection-size="true" horizontal-scrolling="false" show-foldout-header="false" show-alternating-row-backgrounds="All" show-border="false" tabindex="0" style="top: auto; flex-shrink: 1; min-height: auto; flex-grow: 1; padding-top: 10px;" />
         </ui:VisualElement>
-        <ui:VisualElement name="OperationsArea" style="width: 33%;">
-            <ui:Label text="Label" display-tooltip-when-elided="true" />
+        <ui:VisualElement name="OperationsArea" style="width: 35%; flex-shrink: 1; align-items: stretch; justify-content: flex-start; overflow: visible; min-height: auto; height: initial; flex-grow: 1; margin-left: 5px;">
+            <ui:VisualElement name="PreviewArea" style="width: initial; height: 50%; flex-shrink: 1; align-items: stretch; justify-content: flex-start; min-height: auto; flex-grow: 1;">
+                <ui:Label text="Preview" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 20px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="OperationsArea" style="width: initial; height: 50%; min-height: auto; position: relative; flex-grow: 1;">
+                <ui:Label text="Operations" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 20px;" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:GroupBox>
 </ui:UXML>
