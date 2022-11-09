@@ -28,7 +28,7 @@ public static class AtlasMaintainerHelpers
         {
             IContainerFunctions target = wrappedDrawers[i];
             
-            SearchSpriteFromAtlases(target.GetSpriteName());
+            SearchSpriteFromAtlases(target.Sprite.name);
         }
     }
 
@@ -38,7 +38,7 @@ public static class AtlasMaintainerHelpers
     
     private interface IContainerFunctions
     {
-        string GetSpriteName();
+        Sprite Sprite { get; }
     }
 
     private abstract class SpriteGenericContainer<T>
@@ -53,25 +53,19 @@ public static class AtlasMaintainerHelpers
 
     private class ImageContainer : SpriteGenericContainer<Image>, IContainerFunctions
     {
+        public Sprite Sprite => Drawer.sprite;
+
         public ImageContainer(Image drawer) : base(drawer)
         {
-        }
-        
-        public string GetSpriteName()
-        {
-            return Drawer.sprite.name;
         }
     }
     
     private class SpriteRendererContainer : SpriteGenericContainer<SpriteRenderer>, IContainerFunctions
     {
+        public Sprite Sprite => Drawer.sprite;
+
         public SpriteRendererContainer(SpriteRenderer drawer) : base(drawer)
         {
-        }
-        
-        public string GetSpriteName()
-        {
-            return Drawer.sprite.name;
         }
     }
 
@@ -261,22 +255,6 @@ public static class AtlasMaintainerHelpers
             
         Debug.LogWarning($"Atlas Could not found for sprite {spriteName}");
     }
-    public static bool TryGetAllAtlases(out SpriteAtlas[] atlases)
-    {
-        string[] atlasPaths = AssetDatabase.FindAssets("t:SpriteAtlas");
-        atlases = new SpriteAtlas[atlasPaths.Length];
-    
-        if (atlasPaths.Length == 0)
-            return false;
-            
-        for (int i = 0; i < atlasPaths.Length; i++)
-        {
-            string assetPath = AssetDatabase.GUIDToAssetPath(atlasPaths[i]);
-            atlases[i] = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(assetPath);
-        }
-    
-        return true;
-    }
     
     public static bool ValidateSprite(Object targetObject)
     {
@@ -311,15 +289,45 @@ public static class AtlasMaintainerHelpers
         return TryGetAllDrawersInContainer(targetGameObject, out IContainerFunctions[] _);
     }
 
-    public static bool TryGetSprite(Object targetObject, out Sprite[] sprites)
+    public static bool TryGetAllSprites(Object targetObject, out Sprite[] sprites)
     {
         sprites = new Sprite[] { };
-        
-        if (!ValidateSprite(targetObject))
+
+        if (ValidateSprite(targetObject))
+        {
+            string assetPath = AssetDatabase.GetAssetPath(targetObject);
+            sprites = AssetDatabase.LoadAllAssetsAtPath(assetPath).OfType<Sprite>().ToArray();
+
+            return true;
+        }
+        else if (ValidatePrefab(targetObject))
+        {
+            if (TryGetAllDrawersInContainer(targetObject as GameObject, out IContainerFunctions[] containers))
+            {
+                sprites = new Sprite[containers.Length];
+                for(int i = 0; i < containers.Length ; i++)
+                    sprites[i] = containers[i].Sprite;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static bool TryGetAllAtlases(out SpriteAtlas[] atlases)
+    {
+        string[] atlasPaths = AssetDatabase.FindAssets("t:SpriteAtlas");
+        atlases = new SpriteAtlas[atlasPaths.Length];
+
+        if (atlasPaths.Length == 0)
             return false;
 
-        string assetPath = AssetDatabase.GetAssetPath(targetObject);
-        sprites = AssetDatabase.LoadAllAssetsAtPath(assetPath).OfType<Sprite>().ToArray();
+        for (int i = 0; i < atlasPaths.Length; i++)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(atlasPaths[i]);
+            atlases[i] = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(assetPath);
+        }
 
         return true;
     }
