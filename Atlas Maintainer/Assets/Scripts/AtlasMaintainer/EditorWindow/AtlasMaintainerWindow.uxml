@@ -2,7 +2,7 @@
     <ui:GroupBox style="justify-content: center; flex-direction: row; height: 400px; flex-grow: 1;">
         <ui:VisualElement name="AssetsArea" style="width: 35%; justify-content: flex-start; flex-grow: 0.33; height: initial; flex-shrink: 1; border-left-width: 0; border-right-width: 5px; border-top-width: 0; border-bottom-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); padding-right: 5px;">
             <ui:Label text="Assets" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 20px;" />
-            <ui:ListView focusable="true" name="AssetsListView" selection-type="Single" virtualization-method="DynamicHeight" style="min-height: auto; flex-grow: 1;" />
+            <ui:ListView focusable="true" name="AssetsListView" selection-type="Multiple" virtualization-method="DynamicHeight" style="min-height: auto; flex-grow: 1;" />
         </ui:VisualElement>
         <ui:VisualElement name="AtlasesArea" style="width: 30%; justify-content: flex-start; flex-grow: 0.33; height: initial; flex-shrink: 1; border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); border-right-width: 5px; border-left-width: 0; margin-left: 5px; margin-right: 0; padding-right: 5px;">
             <ui:VisualElement name="Header" style="height: auto; flex-direction: row; justify-content: space-between; min-height: auto; flex-shrink: 1; opacity: 1; flex-grow: 0;">

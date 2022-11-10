@@ -27,7 +27,7 @@ public static class AtlasMaintainerHelpers
         {
             IContainerFunctions target = wrappedDrawers[i];
             
-            SearchSpriteFromAtlases(target.Sprite);
+            GetSpriteAtlasesOrEmpty(target.Sprite);
         }
     }
 
@@ -95,7 +95,7 @@ public static class AtlasMaintainerHelpers
 
 #region Edit Functions
 
-    [MenuItem("Assets/Atlas Maintainer/Edit/Create new atlas")]
+    [Obsolete]
     private static void CreateAtlas()
     {
         SpriteAtlas spriteAtlas = new SpriteAtlas();
@@ -106,8 +106,8 @@ public static class AtlasMaintainerHelpers
         AssetDatabase.CreateAsset(spriteAtlas, "Assets/Textures/Atlases/GeneratedAtlas.spriteatlas");
         AssetDatabase.SaveAssets();
     }
-    
-    [MenuItem("Assets/Atlas Maintainer/Edit/Delete atlas")]
+
+    [Obsolete]
     private static void RemoveAtlas()
     {
         List<string> failedPaths = new List<string>();
@@ -124,45 +124,45 @@ public static class AtlasMaintainerHelpers
 
     #endregion
 
-    #region Add & Remove Functions
-
-    [Obsolete]
-    [MenuItem("Assets/Atlas Maintainer/Edit/Add Asset to atlas")]
-    private static void AddAssetToAtlas()
-    {
-        SpriteAtlas spriteAtlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/Textures/Atlases/Atlas01.spriteatlas");
-
-        AddAssetsToAtlas(spriteAtlas, new[] { Selection.activeObject }, true);
-    }
-
-    [Obsolete]
-    [MenuItem("Assets/Atlas Maintainer/Edit/Remove Asset from atlas")]
-    private static void RemoveAssetFromAtlas()
-    {
-        SpriteAtlas spriteAtlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/Textures/Atlases/Atlas01.spriteatlas");
-
-        if (IsParentFolderAddedToAtlas(spriteAtlas, Selection.activeObject))
-        {
-            Object[] subAssets = GetAllAssetsFromFolder(Selection.activeObject, false);
-
-            Object folder = GetParentFolderOf(Selection.activeObject);
-            RemoveAssetsFromAtlas(spriteAtlas, new[] { folder });
-
-            AddAssetsToAtlas(spriteAtlas, subAssets);
-        }
-        
-        RemoveAssetsFromAtlas(spriteAtlas, new[] { Selection.activeObject }, true);
-    }
-    
+#region Add & Remove Functions
     public static void AddAssetsToAtlas(SpriteAtlas spriteAtlas, Object[] objects,  bool packAtlas = false)
     {
-        spriteAtlas.Add(objects);
-        
+        Object[] packables = spriteAtlas.GetPackables();
+        List<Object> newObjects = new();
+
+        for (int i = 0; i < objects.Length; i++)
+        {
+            if (packables.Contains(objects[i]))
+                continue;
+
+            newObjects.Add(objects[i]);
+        }
+
+        spriteAtlas.Add(newObjects.ToArray());
+
         if (packAtlas)
             SpriteAtlasUtility.PackAtlases(new[] { spriteAtlas }, EditorUserBuildSettings.activeBuildTarget);
     }
-    
+
     public static void RemoveAssetsFromAtlas(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
+    {
+        for (int i = 0; i < objects.Length; i++)
+        {
+            if (IsParentFolderAddedToAtlas(spriteAtlas, objects[i]))
+            {
+                Object[] subAssets = GetAllAssetsFromFolder(objects[i], false);
+
+                Object folder = GetParentFolderOf(objects[i]);
+                RemoveAssetsFromAtlas_Internal(spriteAtlas, new[] { folder });
+
+                AddAssetsToAtlas(spriteAtlas, subAssets);
+            }
+        }
+
+        RemoveAssetsFromAtlas_Internal(spriteAtlas, objects, packAtlas);
+    }
+
+    private static void RemoveAssetsFromAtlas_Internal(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
     {
         spriteAtlas.Remove(objects);
         
@@ -198,15 +198,9 @@ public static class AtlasMaintainerHelpers
     private static bool IsParentFolderAddedToAtlas(SpriteAtlas spriteAtlas, Object targetObject)
     {
         Object folder = GetParentFolderOf(targetObject);
-        
         Object[] packables = spriteAtlas.GetPackables();
-        for (int i = 0; i < packables.Length; i++)
-        {
-            if (packables[i] == folder)
-                return true;
-        }
 
-        return false;
+        return packables.Contains(folder);
     }
 
     private static Object GetParentFolderOf(Object targetObject)
@@ -227,7 +221,7 @@ public static class AtlasMaintainerHelpers
     /// </summary>
     /// <param name="spriteName">sprite name to search</param>
     /// <param name="candidateAtlases">Atlases to search for</param>
-    public static SpriteAtlas[] SearchSpriteFromAtlases(Sprite sprite, SpriteAtlas[] candidateAtlases = null)
+    public static SpriteAtlas[] GetSpriteAtlasesOrEmpty(Sprite sprite, SpriteAtlas[] candidateAtlases = null)
     {
         SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
         List<SpriteAtlas> result = new();
@@ -248,9 +242,6 @@ public static class AtlasMaintainerHelpers
 
             result.Add(candidateAtlases[i]);
         }
-            
-        if (result.Count == 0)  
-            Debug.LogWarning($"Atlas Could not found for sprite {sprite.name}");
 
         return result.ToArray();
     }

@@ -77,31 +77,12 @@ public class AtlasMaintainerWindow : EditorWindow
 
     private void OnAssetSelectionChanged(IEnumerable<object> chosenAssets)
     {
-        Sprite selectedSprite = assetListController.AssetsListView.selectedItem as Sprite;
+        List<Sprite> selectedSprites = new();
 
-        UpdateWindowFor(selectedSprite);
-    }
+        foreach (object item in chosenAssets)
+            selectedSprites.Add(item as Sprite);
 
-    private void UpdateOperationButtons()
-    {
-        bool isAnyAssetSelected = assetListController.GetSelectedLabelOrDefault(out Label assetLabel);
-        bool isAnyAtlasSelected = atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
-
-        operationsController.UpdateButtons(
-            isAnyAssetSelected ? assetLabel : null,
-            isAnyAtlasSelected ? atlasLabel : null);
-    }
-
-    private void SetupPreview(Texture2D selectedTexture)
-    {
-        assetPreview.style.backgroundImage = new StyleBackground(selectedTexture);
-    }
-
-    private void EnableIncludingAtlases(Sprite selectedSprite)
-    {
-        SpriteAtlas[] atlases = AtlasMaintainerHelpers.SearchSpriteFromAtlases(selectedSprite);
-
-        atlasListController.EnableAtlases(atlases);
+        UpdateWindowFor(selectedSprites.ToArray());
     }
 
     private void OnMoveToAtlasButtonClicked()
@@ -111,36 +92,69 @@ public class AtlasMaintainerWindow : EditorWindow
 
     private void OnRemoveFromAtlasClicked()
     {
-        assetListController.GetSelectedLabelOrDefault(out Label assetLabel);
-        Sprite sprite = (assetLabel.userData as AssetListEntry).ReferencedSprite;
-
         atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
         SpriteAtlas spriteAtlas = (atlasLabel.userData as AtlasListEntry).ReferencedAtlas;
 
-        AtlasMaintainerHelpers.RemoveAssetsFromAtlas(spriteAtlas, new Object[] { sprite.texture }, true);
+        assetListController.GetSelectedLabelsOrDefault(out Label[] assetLabels);
+        (Sprite[], Texture2D[]) spritesAndTextures = assetListController.ConvertLabelsToSpritesAndTextures(assetLabels);
 
-        UpdateWindowFor(sprite);
+        AtlasMaintainerHelpers.RemoveAssetsFromAtlas(spriteAtlas, spritesAndTextures.Item2, true);
+
+        UpdateWindowFor(spritesAndTextures.Item1);
     }
 
     private void OnAddToAtlasClicked()
     {
-        assetListController.GetSelectedLabelOrDefault(out Label assetLabel);
-        Sprite sprite = (assetLabel.userData as AssetListEntry).ReferencedSprite;
-
         atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
         SpriteAtlas spriteAtlas = (atlasLabel.userData as AtlasListEntry).ReferencedAtlas;
 
-        AtlasMaintainerHelpers.AddAssetsToAtlas(spriteAtlas, new Object[] { sprite.texture }, true);
+        assetListController.GetSelectedLabelsOrDefault(out Label[] assetLabels);
+        (Sprite[], Texture2D[]) spritesAndTextures = assetListController.ConvertLabelsToSpritesAndTextures(assetLabels);
 
-        UpdateWindowFor(sprite);
+        AtlasMaintainerHelpers.AddAssetsToAtlas(spriteAtlas, spritesAndTextures.Item2, true);
+
+        UpdateWindowFor(spritesAndTextures.Item1);
     }
 
-    private void UpdateWindowFor(Sprite sprite)
+    private void UpdateWindowFor(Sprite[] sprites)
     {
-        SetupPreview(sprite.texture);
+        SetupPreview(sprites);
 
-        EnableIncludingAtlases(sprite);
+        EnableIncludingAtlases(sprites);
 
         UpdateOperationButtons();
+    }
+
+    private void SetupPreview(Sprite[] selectedSprite)
+    {
+        if (selectedSprite.Length > 0)
+            assetPreview.style.backgroundImage = null;
+        else
+            assetPreview.style.backgroundImage = new StyleBackground(selectedSprite[0].texture);
+    }
+
+    private void EnableIncludingAtlases(Sprite[] selectedSprites)
+    {
+        SpriteAtlas[] candidateAtlases = AtlasMaintainerHelpers.GetSpriteAtlasesOrEmpty(selectedSprites[0]);
+
+        for (int i = 1; i < selectedSprites.Length; i++)
+        {
+            candidateAtlases = AtlasMaintainerHelpers.GetSpriteAtlasesOrEmpty(selectedSprites[i], candidateAtlases);
+
+            if (candidateAtlases.Length == 0)
+                break;
+        }
+
+        atlasListController.EnableAtlases(candidateAtlases);
+    }
+
+    private void UpdateOperationButtons()
+    {
+        bool isAnyAssetSelected = assetListController.GetSelectedLabelsOrDefault(out Label[] assetLabels);
+        bool isAnyAtlasSelected = atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
+
+        operationsController.UpdateButtons(
+            isAnyAssetSelected ? assetLabels : null,
+            isAnyAtlasSelected ? atlasLabel : null);
     }
 }

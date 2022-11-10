@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -65,7 +66,7 @@ public class AssetListController
         return true;
     }
 
-    /*internal bool GetSelectedLabelsOrDefault(out Label[] label)
+    internal bool GetSelectedLabelsOrDefault(out Label[] label)
     {
         label = default;
     
@@ -81,5 +82,19 @@ public class AssetListController
         label = result.ToArray();
     
         return true;
-    }*/
+    }
+
+    internal (Sprite[], Texture2D[]) ConvertLabelsToSpritesAndTextures(Label[] labels)
+    {
+        Sprite[] sprites = new Sprite[labels.Length];
+        Texture2D[] textures = new Texture2D[labels.Length];
+
+        for (int i = 0; i < labels.Length; i++)
+        {
+            sprites[i] = (labels[i].userData as AssetListEntry).ReferencedSprite;
+            textures[i] = sprites[i].texture;
+        }
+
+        return (sprites, textures);
+    }
 }

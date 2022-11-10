@@ -33,12 +33,12 @@ public class OperationsController
             CreateAtlasButton);
     }
 
-    internal void UpdateButtons(Label selectedAssetLabel, Label selectedAtlasLabel)
+    internal void UpdateButtons(Label[] selectedAssetLabels, Label selectedAtlasLabel)
     {
         ToggleButtons(selectedAtlasLabel != null,
             DeleteAtlasButton);
 
-        if (selectedAssetLabel == null || selectedAtlasLabel == null)
+        if (selectedAssetLabels.Length == 0 || selectedAtlasLabel == null)
         {
             ToggleButtons(false,
                 AddToAtlasButton, RemoveFromAtlasButton,
@@ -47,9 +47,11 @@ public class OperationsController
             return;
         }
 
-        ToggleButtons(true,
-            AddToAtlasButton, RemoveFromAtlasButton,
-            MoveToAtlasButton);
+        ToggleButtons(!selectedAtlasLabel.enabledInHierarchy,
+            AddToAtlasButton, MoveToAtlasButton);
+
+        ToggleButtons(selectedAtlasLabel.enabledInHierarchy,
+            RemoveFromAtlasButton);
     }
 
     private void ToggleButtons(bool isEnabled, params Button[] buttons)

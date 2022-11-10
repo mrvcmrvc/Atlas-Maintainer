@@ -33,7 +33,7 @@ SpriteAtlas:
     variantMultiplier: 1
     packables:
     - {fileID: 2800000, guid: 573b59575406b4d62a3cb3fd6e9c4f1a, type: 3}
-    - {fileID: 2800000, guid: a3bdb5aee8d60473ba017927f3e54ba8, type: 3}
+    - {fileID: 2800000, guid: d677067913f9e4dcea054d7a31c8f155, type: 3}
     - {fileID: 2800000, guid: d9496eb65b8ab446299fffac1f5b6fcd, type: 3}
     - {fileID: 2800000, guid: 41e07d01e27934c76b19a31b1dc7fc5b, type: 3}
     - {fileID: 2800000, guid: 6c405aba23a6941d69a5f0afe5d36ada, type: 3}
@@ -49,7 +49,7 @@ SpriteAtlas:
     - {fileID: 2800000, guid: aedbed313eb664ec2ac33a2a7bc37b44, type: 3}
     - {fileID: 2800000, guid: 825ff4f5ae54143d0931442b3e825b5d, type: 3}
     - {fileID: 2800000, guid: 2c711bf45a6af4270ac4f947f1bf7345, type: 3}
-    - {fileID: 2800000, guid: d677067913f9e4dcea054d7a31c8f155, type: 3}
+    - {fileID: 2800000, guid: a3bdb5aee8d60473ba017927f3e54ba8, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
