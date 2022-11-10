@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -7,8 +6,11 @@ using UnityEngine.UIElements;
 
 public class AtlasMaintainerWindow : EditorWindow
 {
-    private ListView assetsListView;
-    private ListView atlasListView;
+    private OperationsController operationsController;
+    private AtlasListController atlasListController;
+    private AssetListController assetListController;
+
+    private VisualElement assetPreview;
 
     [MenuItem("Assets/Atlas Maintainer/Open in Atlas Maintainer", true)]
     private static bool ValidateCanOpenInAtlasMaintainer()
@@ -33,108 +35,112 @@ public class AtlasMaintainerWindow : EditorWindow
     {
         GenerateLayoutFromUXML(rootVisualElement);
 
-        FillAssetsVisualElement(rootVisualElement);
-        FillAtlasesVisualElement(rootVisualElement);
+        assetPreview = rootVisualElement
+            .Q<VisualElement>("OthersArea")
+            .Q<VisualElement>("PreviewArea")
+            .Q<VisualElement>("AssetPreview");
+
+        operationsController = new OperationsController(rootVisualElement);
+        atlasListController = new AtlasListController(rootVisualElement);
+        assetListController = new AssetListController(rootVisualElement);
+
+        assetListController.FillAssetsVisualElement();
+        atlasListController.FillAtlasesVisualElement();
+        operationsController.SetButtons();
+
+        SetupEvents();
     }
 
     private void GenerateLayoutFromUXML(VisualElement root)
     {
-        VisualTreeAsset visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Scripts/AtlasMaintainer/EditorWindow/AtlasMaintainerWindow.uxml");
+        VisualTreeAsset visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+            "Assets/Scripts/AtlasMaintainer/EditorWindow/AtlasMaintainerWindow.uxml");
+
         VisualElement labelFromUXML = visualTree.Instantiate();
         root.Add(labelFromUXML);
     }
 
-    private void FillAssetsVisualElement(VisualElement root)
+    private void SetupEvents()
     {
-        bool isSuccess = AtlasMaintainerHelpers
-            .TryGetAllSprites(Selection.activeObject, out Sprite[] sprites);
-        if (!isSuccess)
-            return;
+        assetListController.AssetsListView.onSelectionChange += OnAssetSelectionChanged;
+        atlasListController.AtlasListView.onSelectionChange += OnAtlasSelectionChanged;
 
-        VisualElement assetsArea = root.Q<VisualElement>("AssetsArea");
-        assetsListView = assetsArea.Q<ListView>("AssetsListView");
-
-        // Defines what to create for each item in the given itemsSource
-        assetsListView.makeItem = () =>
-        {
-            Label newLabel = new();
-            AssetListEntry entryController = new();
-
-            newLabel.userData = entryController;
-            entryController.SetVisualElement(newLabel);
-
-            return newLabel;
-        };
-
-        // Defines the logic of data binding for each item in the given itemsSource
-        assetsListView.bindItem = (item, index) =>
-        {
-            AssetListEntry assetListEntry = item.userData as AssetListEntry;
-
-            assetListEntry.SetSprite(sprites[index]);
-            assetListEntry.UpdateText();
-        };
-
-        // Sets the itemsSource and triggers makeItem & bindItem
-        assetsListView.itemsSource = sprites;
-
-        assetsListView.onSelectionChange += OnAssetsChosen;
+        operationsController.AddToAtlasButton.clicked += OnAddToAtlasClicked;
+        operationsController.RemoveFromAtlasButton.clicked += OnRemoveFromAtlasClicked;
+        operationsController.MoveToAtlasButton.clicked += OnMoveToAtlasButtonClicked;
     }
 
-    private void OnAssetsChosen(IEnumerable<object> chosenAssets)
+    private void OnAtlasSelectionChanged(IEnumerable<object> chosenAtlases)
     {
-        Sprite selectedSprite = assetsListView.selectedItem as Sprite;
-
-        VisualElement assetPreview = rootVisualElement.Q<VisualElement>("OthersArea")
-            .Q<VisualElement>("PreviewArea")
-            .Q<VisualElement>("AssetPreview");
-
-        assetPreview.style.backgroundImage = new StyleBackground(selectedSprite);
+        UpdateOperationButtons();
     }
 
-    private void FillAtlasesVisualElement(VisualElement root)
+    private void OnAssetSelectionChanged(IEnumerable<object> chosenAssets)
     {
-        bool isSuccess = AtlasMaintainerHelpers
-            .TryGetAllAtlases(out SpriteAtlas[] allAtlases);
-        if (!isSuccess)
-            return;
-        
-        VisualElement atlasesArea = root.Q<VisualElement>("AtlasesArea");
-        atlasListView = atlasesArea.Q<ListView>("AtlasesListView");
+        Sprite selectedSprite = assetListController.AssetsListView.selectedItem as Sprite;
 
-        // Defines what to create for each item in the given itemsSource
-        atlasListView.makeItem = () =>
-        {
-            Label newLabel = new();
-            AtlasListEntry entryController = new();
-
-            newLabel.userData = entryController;
-            entryController.SetVisualElement(newLabel);
-
-            return newLabel;
-        };
-
-        // Defines the logic of data binding for each item in the given itemsSource
-        atlasListView.bindItem = (item, index) =>
-        {
-            AtlasListEntry atlasListEntry = item.userData as AtlasListEntry;
-
-            atlasListEntry.SetAtlas(allAtlases[index]);
-            atlasListEntry.UpdateText();
-        };
-
-        // Sets the itemsSource and triggers makeItem & bindItem
-        atlasListView.itemsSource = allAtlases;
-
-        atlasListView.onSelectionChange += OnAtlasesChosen;
+        UpdateWindowFor(selectedSprite);
     }
 
-    private void OnAtlasesChosen(IEnumerable<object> chosenAtlases)
+    private void UpdateOperationButtons()
     {
-        SpriteAtlas selectedSpriteAtlas = atlasListView.selectedItem as SpriteAtlas;
+        bool isAnyAssetSelected = assetListController.GetSelectedLabelOrDefault(out Label assetLabel);
+        bool isAnyAtlasSelected = atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
 
-        Debug.Log(selectedSpriteAtlas);
-        Debug.Log(atlasListView[0]);
-        atlasListView[0].SetEnabled(false);
+        operationsController.UpdateButtons(
+            isAnyAssetSelected ? assetLabel : null,
+            isAnyAtlasSelected ? atlasLabel : null);
+    }
+
+    private void SetupPreview(Texture2D selectedTexture)
+    {
+        assetPreview.style.backgroundImage = new StyleBackground(selectedTexture);
+    }
+
+    private void EnableIncludingAtlases(Sprite selectedSprite)
+    {
+        SpriteAtlas[] atlases = AtlasMaintainerHelpers.SearchSpriteFromAtlases(selectedSprite);
+
+        atlasListController.EnableAtlases(atlases);
+    }
+
+    private void OnMoveToAtlasButtonClicked()
+    {
+        Debug.Log("OnMoveToAtlasButtonClicked");
+    }
+
+    private void OnRemoveFromAtlasClicked()
+    {
+        assetListController.GetSelectedLabelOrDefault(out Label assetLabel);
+        Sprite sprite = (assetLabel.userData as AssetListEntry).ReferencedSprite;
+
+        atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
+        SpriteAtlas spriteAtlas = (atlasLabel.userData as AtlasListEntry).ReferencedAtlas;
+
+        AtlasMaintainerHelpers.RemoveAssetsFromAtlas(spriteAtlas, new Object[] { sprite.texture }, true);
+
+        UpdateWindowFor(sprite);
+    }
+
+    private void OnAddToAtlasClicked()
+    {
+        assetListController.GetSelectedLabelOrDefault(out Label assetLabel);
+        Sprite sprite = (assetLabel.userData as AssetListEntry).ReferencedSprite;
+
+        atlasListController.GetSelectedLabelOrDefault(out Label atlasLabel);
+        SpriteAtlas spriteAtlas = (atlasLabel.userData as AtlasListEntry).ReferencedAtlas;
+
+        AtlasMaintainerHelpers.AddAssetsToAtlas(spriteAtlas, new Object[] { sprite.texture }, true);
+
+        UpdateWindowFor(sprite);
+    }
+
+    private void UpdateWindowFor(Sprite sprite)
+    {
+        SetupPreview(sprite.texture);
+
+        EnableIncludingAtlases(sprite);
+
+        UpdateOperationButtons();
     }
 }

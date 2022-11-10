@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,29 +7,27 @@ using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
 using Image = UnityEngine.UI.Image;
+using Object = UnityEngine.Object;
 
 public static class AtlasMaintainerHelpers
 {
 #region Find Functions
-    
-    private static void FindAtlasesForSprite()
-    {
-        Texture2D targetTexture = Selection.activeObject as Texture2D;
 
-        SearchSpriteFromAtlases(targetTexture.name);
-    }
-    
-    private static void FindAtlasesForPrefab()
+    /// <summary>
+    /// Obsolete. It is not being used yet and nor required!
+    /// Finds all the textures under the prefab and seraches them inside of the atlases in the project.
+    /// </summary>
+    /// <param name="prefab">Prefab to search</param>
+    [Obsolete]
+    private static void FindAtlasesForPrefab(GameObject prefab)
     {
-        GameObject targetGameObject = Selection.activeObject as GameObject;
-
-        TryGetAllDrawersInContainer(targetGameObject, out IContainerFunctions[] wrappedDrawers);
+        TryGetAllDrawersInContainer(prefab, out IContainerFunctions[] wrappedDrawers);
 
         for (int i = 0; i < wrappedDrawers.Length; i++)
         {
             IContainerFunctions target = wrappedDrawers[i];
             
-            SearchSpriteFromAtlases(target.Sprite.name);
+            SearchSpriteFromAtlases(target.Sprite);
         }
     }
 
@@ -123,10 +122,11 @@ public static class AtlasMaintainerHelpers
             Debug.LogWarning($"Failed to remove the asset at {failedPaths[i]}");
     }
 
-#endregion
+    #endregion
 
-#region Add & Remove Functions
+    #region Add & Remove Functions
 
+    [Obsolete]
     [MenuItem("Assets/Atlas Maintainer/Edit/Add Asset to atlas")]
     private static void AddAssetToAtlas()
     {
@@ -135,6 +135,7 @@ public static class AtlasMaintainerHelpers
         AddAssetsToAtlas(spriteAtlas, new[] { Selection.activeObject }, true);
     }
 
+    [Obsolete]
     [MenuItem("Assets/Atlas Maintainer/Edit/Remove Asset from atlas")]
     private static void RemoveAssetFromAtlas()
     {
@@ -153,7 +154,7 @@ public static class AtlasMaintainerHelpers
         RemoveAssetsFromAtlas(spriteAtlas, new[] { Selection.activeObject }, true);
     }
     
-    private static void AddAssetsToAtlas(SpriteAtlas spriteAtlas, Object[] objects,  bool packAtlas = false)
+    public static void AddAssetsToAtlas(SpriteAtlas spriteAtlas, Object[] objects,  bool packAtlas = false)
     {
         spriteAtlas.Add(objects);
         
@@ -161,7 +162,7 @@ public static class AtlasMaintainerHelpers
             SpriteAtlasUtility.PackAtlases(new[] { spriteAtlas }, EditorUserBuildSettings.activeBuildTarget);
     }
     
-    private static void RemoveAssetsFromAtlas(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
+    public static void RemoveAssetsFromAtlas(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
     {
         spriteAtlas.Remove(objects);
         
@@ -226,10 +227,10 @@ public static class AtlasMaintainerHelpers
     /// </summary>
     /// <param name="spriteName">sprite name to search</param>
     /// <param name="candidateAtlases">Atlases to search for</param>
-    private static void SearchSpriteFromAtlases(string spriteName, SpriteAtlas[] candidateAtlases = null)
+    public static SpriteAtlas[] SearchSpriteFromAtlases(Sprite sprite, SpriteAtlas[] candidateAtlases = null)
     {
         SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
-        Sprite cloneInAtlas = null;
+        List<SpriteAtlas> result = new();
     
         if (candidateAtlases == null)
             TryGetAllAtlases(out candidateAtlases);
@@ -237,23 +238,21 @@ public static class AtlasMaintainerHelpers
         if (candidateAtlases == null)
         {
             Debug.LogWarning("No atlas found in the project!");
-            return;
+            return result.ToArray();
         }
             
         for (int i = 0; i < candidateAtlases.Length; i++)
         {
-            cloneInAtlas = candidateAtlases[i].GetSprite(spriteName);
-            if (!cloneInAtlas)
+            if (!candidateAtlases[i].CanBindTo(sprite))
                 continue;
-                
-            Debug.Log($"{candidateAtlases[i].name} includes the {spriteName} sprite");
-            break;
+
+            result.Add(candidateAtlases[i]);
         }
             
-        if (cloneInAtlas)
-            return;
-            
-        Debug.LogWarning($"Atlas Could not found for sprite {spriteName}");
+        if (result.Count == 0)  
+            Debug.LogWarning($"Atlas Could not found for sprite {sprite.name}");
+
+        return result.ToArray();
     }
     
     public static bool ValidateSprite(Object targetObject)
