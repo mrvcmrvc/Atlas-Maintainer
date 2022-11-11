@@ -16,7 +16,8 @@ public class AtlasMaintainerWindow : EditorWindow
     private static bool ValidateCanOpenInAtlasMaintainer()
     {
         return AtlasMaintainerHelpers.ValidateSprite(Selection.activeObject)
-            || AtlasMaintainerHelpers.ValidatePrefab(Selection.activeObject);
+            || AtlasMaintainerHelpers.ValidatePrefab(Selection.activeObject)
+            || AtlasMaintainerHelpers.ValidateFolder(Selection.activeObject);
     }
 
     [MenuItem("Assets/Atlas Maintainer/Open in Atlas Maintainer")]

@@ -34,7 +34,7 @@ public static class AtlasMaintainerHelpers
 #endregion
 
 #region Prefab Helpers
-    
+
     private interface IContainerFunctions
     {
         Sprite Sprite { get; }
@@ -95,6 +95,9 @@ public static class AtlasMaintainerHelpers
 
 #region Edit Functions
 
+    /// <summary>
+    /// Not implemented yet!
+    /// </summary>
     [Obsolete]
     private static void CreateAtlas()
     {
@@ -107,6 +110,9 @@ public static class AtlasMaintainerHelpers
         AssetDatabase.SaveAssets();
     }
 
+    /// <summary>
+    /// Not implemented yet!
+    /// </summary>
     [Obsolete]
     private static void RemoveAtlas()
     {
@@ -124,7 +130,13 @@ public static class AtlasMaintainerHelpers
 
     #endregion
 
-#region Add & Remove Functions
+    #region Add & Remove Functions
+    /// <summary>
+    /// Adds the given objects to the atlas provided.
+    /// </summary>
+    /// <param name="spriteAtlas">Target atlas to add assets to.</param>
+    /// <param name="objects">Objects to add. This can be any texture2D, sprites, or folders;</param>
+    /// <param name="packAtlas">Whether to re-pack the atlas or not. Changes will not be visible until the re-pack.</param>
     public static void AddAssetsToAtlas(SpriteAtlas spriteAtlas, Object[] objects,  bool packAtlas = false)
     {
         Object[] packables = spriteAtlas.GetPackables();
@@ -144,6 +156,12 @@ public static class AtlasMaintainerHelpers
             SpriteAtlasUtility.PackAtlases(new[] { spriteAtlas }, EditorUserBuildSettings.activeBuildTarget);
     }
 
+    /// <summary>
+    /// Removes the given objects from the atlas provided.
+    /// </summary>
+    /// <param name="spriteAtlas">Target atlas to remove assets from.</param>
+    /// <param name="objects">Objects to remove. This can be any texture2D, sprites, or folders;</param>
+    /// <param name="packAtlas">Whether to re-pack the atlas or not. Changes will not be visible until the re-pack.</param>
     public static void RemoveAssetsFromAtlas(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
     {
         for (int i = 0; i < objects.Length; i++)
@@ -170,9 +188,21 @@ public static class AtlasMaintainerHelpers
             SpriteAtlasUtility.PackAtlases(new[] { spriteAtlas }, EditorUserBuildSettings.activeBuildTarget);
     }
 
+    /// <summary>
+    /// Returns all the assets in the folder that contains the targetObject. These assets can be anything.
+    /// </summary>
+    /// <param name="targetObject">This can be any object and it finds the parent folder of this object.
+    /// If this is already a folder, then it seraches inside of this folder.</param>
+    /// <param name="traverseSubFolders">Whether return assets inside of the sub-folders or not</param>
+    /// <returns></returns>
     private static Object[] GetAllAssetsFromFolder(Object targetObject, bool traverseSubFolders = true)
     {
-        Object folder = GetParentFolderOf(targetObject);
+        Object folder;
+        if (ValidateFolder(targetObject))
+            folder = targetObject;
+        else
+            folder = GetParentFolderOf(targetObject);
+
         string folderPath = AssetDatabase.GetAssetPath(folder);
         string[] assets = AssetDatabase.FindAssets("", new []{ folderPath });
 
@@ -195,6 +225,12 @@ public static class AtlasMaintainerHelpers
         return subAssets.ToArray();
     }
     
+    /// <summary>
+    /// Gets parent folder of targetObject and checks if that folder is directly referenced in the spriteAtlas.
+    /// </summary>
+    /// <param name="spriteAtlas">Sprite atlas to look for folder reference</param>
+    /// <param name="targetObject">This can be any object and it finds the parent folder of this object.</param>
+    /// <returns></returns>
     private static bool IsParentFolderAddedToAtlas(SpriteAtlas spriteAtlas, Object targetObject)
     {
         Object folder = GetParentFolderOf(targetObject);
@@ -203,6 +239,11 @@ public static class AtlasMaintainerHelpers
         return packables.Contains(folder);
     }
 
+    /// <summary>
+    /// Returns parent folder of given object.
+    /// </summary>
+    /// <param name="targetObject"></param>
+    /// <returns></returns>
     private static Object GetParentFolderOf(Object targetObject)
     {
         string assetPath = AssetDatabase.GetAssetPath(targetObject);
@@ -246,6 +287,11 @@ public static class AtlasMaintainerHelpers
         return result.ToArray();
     }
     
+    /// <summary>
+    /// Checks if the given object is a texture2D and texture type is Sprite.
+    /// </summary>
+    /// <param name="targetObject"></param>
+    /// <returns></returns>
     public static bool ValidateSprite(Object targetObject)
     {
         if (!ValidateTexture(targetObject))
@@ -260,11 +306,21 @@ public static class AtlasMaintainerHelpers
         return importer.textureType == TextureImporterType.Sprite;
     }
 
+    /// <summary>
+    /// Checks if the given object a texture2D
+    /// </summary>
+    /// <param name="targetObject"></param>
+    /// <returns></returns>
     private static bool ValidateTexture(Object targetObject)
     {
         return targetObject is Texture2D;
     }
     
+    /// <summary>
+    /// Checks if the given object a prefab.
+    /// </summary>
+    /// <param name="targetObject"></param>
+    /// <returns></returns>
     public static bool ValidatePrefab(Object targetObject)
     {
         GameObject targetGameObject = targetObject as GameObject;
@@ -279,6 +335,26 @@ public static class AtlasMaintainerHelpers
         return TryGetAllDrawersInContainer(targetGameObject, out IContainerFunctions[] _);
     }
 
+    /// <summary>
+    /// Checks if the given object is a folder.
+    /// </summary>
+    /// <param name="targetObject"></param>
+    /// <returns></returns>
+    public static bool ValidateFolder(Object targetObject)
+    {
+        string assetPath = AssetDatabase.GetAssetPath(targetObject);
+
+        return AssetDatabase.IsValidFolder(assetPath);
+    }
+
+    /// <summary>
+    /// Tries to get all the sprites in given object
+    /// </summary>
+    /// <param name="targetObject">This can be a folder, texture2D or a prefab.
+    /// In case of folder, it also traverses sub-folders. In texture2D, it checks if it is a sprite type.
+    /// In prefab, it finds all the Image and SpriteRenderer components and returns their sprites.</param>
+    /// <param name="sprites"></param>
+    /// <returns></returns>
     public static bool TryGetAllSprites(Object targetObject, out Sprite[] sprites)
     {
         sprites = new Sprite[] { };
@@ -301,10 +377,39 @@ public static class AtlasMaintainerHelpers
                 return true;
             }
         }
+        //TODO: GetAllAssetsFromFolder already checks if the given object is folder or not
+        // if not, it finds the parent folder
+        else if (ValidateFolder(targetObject))
+        {
+            Object[] objects = GetAllAssetsFromFolder(targetObject);
+
+            //TODO: Improve this sprite getting part by using TryGetAllSprites() recursively
+            List<Sprite> spriteList = new();
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if (ValidateSprite(objects[i]))
+                {
+                    string assetPath = AssetDatabase.GetAssetPath(objects[i]);
+                    Sprite[] subSprites = AssetDatabase.LoadAllAssetsAtPath(assetPath).OfType<Sprite>().ToArray();
+
+                    for (int x = 0; x < subSprites.Length; x++)
+                        spriteList.Add(subSprites[x]);
+                }
+            }
+
+            sprites = spriteList.ToArray();
+
+            return true;
+        }
 
         return false;
     }
 
+    /// <summary>
+    /// Finds all the atlases in the project
+    /// </summary>
+    /// <param name="atlases"></param>
+    /// <returns></returns>
     public static bool TryGetAllAtlases(out SpriteAtlas[] atlases)
     {
         string[] atlasPaths = AssetDatabase.FindAssets("t:SpriteAtlas");

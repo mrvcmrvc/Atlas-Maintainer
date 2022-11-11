@@ -34,15 +34,54 @@ SpriteAtlas:
     packables:
     - {fileID: 2800000, guid: a3bdb5aee8d60473ba017927f3e54ba8, type: 3}
     - {fileID: 2800000, guid: 573b59575406b4d62a3cb3fd6e9c4f1a, type: 3}
+    - {fileID: 102900000, guid: 68aee9d16b6154946b04f0fc9e972556, type: 3}
+    - {fileID: 2800000, guid: 41e07d01e27934c76b19a31b1dc7fc5b, type: 3}
+    - {fileID: 2800000, guid: ff40de469839c45a1a9fb8c2fd40b7c2, type: 3}
+    - {fileID: 2800000, guid: 9228d2424c8c64d37905f4c52b709777, type: 3}
+    - {fileID: 2800000, guid: 21a1fbb62fa12430f8a7bab96853330f, type: 3}
+    - {fileID: 2800000, guid: b2f56e1395f494d2abce32a609fb6e58, type: 3}
+    - {fileID: 2800000, guid: 6c405aba23a6941d69a5f0afe5d36ada, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
+  - {fileID: 21300000, guid: 41e07d01e27934c76b19a31b1dc7fc5b, type: 3}
+  - {fileID: 21300000, guid: aedbed313eb664ec2ac33a2a7bc37b44, type: 3}
+  - {fileID: 21300000, guid: 9228d2424c8c64d37905f4c52b709777, type: 3}
+  - {fileID: 21300000, guid: b2f56e1395f494d2abce32a609fb6e58, type: 3}
+  - {fileID: 21300000, guid: 2c711bf45a6af4270ac4f947f1bf7345, type: 3}
+  - {fileID: 21300000, guid: b5e67a351d8f9468080e8c321f56d429, type: 3}
+  - {fileID: 21300000, guid: 825ff4f5ae54143d0931442b3e825b5d, type: 3}
+  - {fileID: 21300000, guid: ff40de469839c45a1a9fb8c2fd40b7c2, type: 3}
+  - {fileID: 21300000, guid: 21a1fbb62fa12430f8a7bab96853330f, type: 3}
   - {fileID: 21300000, guid: 573b59575406b4d62a3cb3fd6e9c4f1a, type: 3}
+  - {fileID: 21300000, guid: f8d01078a479f45f293e33d38d3a0ab1, type: 3}
+  - {fileID: 21300000, guid: 2c8533f8657b74e8ca649cce08d15a5d, type: 3}
+  - {fileID: 21300000, guid: 62a624798a754403fadbbc7a14364cc1, type: 3}
+  - {fileID: 21300000, guid: d677067913f9e4dcea054d7a31c8f155, type: 3}
+  - {fileID: 21300000, guid: bbed475a4362a4e7cbaae901040dec2a, type: 3}
+  - {fileID: 21300000, guid: 6c405aba23a6941d69a5f0afe5d36ada, type: 3}
+  - {fileID: 21300000, guid: d4284e9ebe76c457ca06365d5d471406, type: 3}
   - {fileID: 21300000, guid: a3bdb5aee8d60473ba017927f3e54ba8, type: 3}
   m_PackedSpriteNamesToIndex:
+  - Frame_04
+  - Icon_10
+  - Frame_07
+  - Frame_09
+  - Icon_08
+  - Icon_05
+  - Icon_07
+  - Frame_06
+  - Frame_08
   - Frame_01
+  - Icon_03
+  - Icon_04
+  - Icon_01
+  - Icon_09
+  - Icon_06
+  - Frame_10
+  - Icon_02
   - Frame_02
   m_RenderDataMap: {}
   m_Tag: Atlas02
