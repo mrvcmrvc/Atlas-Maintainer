@@ -130,7 +130,7 @@ public static class AtlasMaintainerHelpers
 
     #endregion
 
-    #region Add & Remove Functions
+#region Add & Remove Functions
     /// <summary>
     /// Adds the given objects to the atlas provided.
     /// </summary>
@@ -377,8 +377,7 @@ public static class AtlasMaintainerHelpers
                 return true;
             }
         }
-        //TODO: GetAllAssetsFromFolder already checks if the given object is folder or not
-        // if not, it finds the parent folder
+        //TODO: GetAllAssetsFromFolder already checks if the given object is folder or not. If not, it finds the parent folder.
         else if (ValidateFolder(targetObject))
         {
             Object[] objects = GetAllAssetsFromFolder(targetObject);
