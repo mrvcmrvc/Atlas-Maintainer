@@ -126,12 +126,12 @@ public class AtlasMaintainerWindow : EditorWindow
         UpdateOperationButtons();
     }
 
-    private void SetupPreview(Sprite[] selectedSprite)
+    private void SetupPreview(Sprite[] selectedSprites)
     {
-        if (selectedSprite.Length > 0)
+        if (selectedSprites.Length > 1)
             assetPreview.style.backgroundImage = null;
         else
-            assetPreview.style.backgroundImage = new StyleBackground(selectedSprite[0].texture);
+            assetPreview.style.backgroundImage = new StyleBackground(selectedSprites[0].texture);
     }
 
     private void EnableIncludingAtlases(Sprite[] selectedSprites)
