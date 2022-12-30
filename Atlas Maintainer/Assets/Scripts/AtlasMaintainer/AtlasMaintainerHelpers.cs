@@ -9,9 +9,10 @@ using UnityEngine.U2D;
 using Image = UnityEngine.UI.Image;
 using Object = UnityEngine.Object;
 
+
 public static class AtlasMaintainerHelpers
 {
-#region Find Functions
+    #region Find Functions
 
     /// <summary>
     /// Obsolete. It is not being used yet and nor required!
@@ -31,9 +32,9 @@ public static class AtlasMaintainerHelpers
         }
     }
 
-#endregion
+    #endregion
 
-#region Prefab Helpers
+    #region Prefab Helpers
 
     private interface IContainerFunctions
     {
@@ -91,32 +92,37 @@ public static class AtlasMaintainerHelpers
         return true;
     }
 
-#endregion
+    #endregion
 
-#region Edit Functions
+    #region Edit Functions
 
     /// <summary>
     /// Not implemented yet!
     /// </summary>
-    [Obsolete]
-    private static void CreateAtlas()
+    public static SpriteAtlas CreateAtlas(string atlasName, Object[] objects)
     {
-        SpriteAtlas spriteAtlas = new SpriteAtlas();
-    
+        throw new NotImplementedException();
+
+        SpriteAtlas spriteAtlas = new();
+        spriteAtlas.Add(objects);
+
         if (!Directory.Exists("Assets/Textures/Atlases"))
             Directory.CreateDirectory("Assets/Textures/Atlases");
             
         AssetDatabase.CreateAsset(spriteAtlas, "Assets/Textures/Atlases/GeneratedAtlas.spriteatlas");
         AssetDatabase.SaveAssets();
+
+        return spriteAtlas;
     }
 
     /// <summary>
     /// Not implemented yet!
     /// </summary>
-    [Obsolete]
-    private static void RemoveAtlas()
+    public static void DeleteAtlases(SpriteAtlas[] atlasesToDelete)
     {
-        List<string> failedPaths = new List<string>();
+        throw new NotImplementedException();
+
+        List<string> failedPaths = new();
         AssetDatabase.DeleteAssets(new[]{
             "Assets/Textures/Atlases/GeneratedAtlas.spriteatlas",
         }, failedPaths);
@@ -153,7 +159,7 @@ public static class AtlasMaintainerHelpers
         spriteAtlas.Add(newObjects.ToArray());
 
         if (packAtlas)
-            SpriteAtlasUtility.PackAtlases(new[] { spriteAtlas }, EditorUserBuildSettings.activeBuildTarget);
+            PackAtlases(new[] { spriteAtlas });
     }
 
     /// <summary>
@@ -183,9 +189,14 @@ public static class AtlasMaintainerHelpers
     private static void RemoveAssetsFromAtlas_Internal(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
     {
         spriteAtlas.Remove(objects);
-        
+
         if (packAtlas)
-            SpriteAtlasUtility.PackAtlases(new[] { spriteAtlas }, EditorUserBuildSettings.activeBuildTarget);
+            PackAtlases(new[] { spriteAtlas });
+    }
+
+    public static void PackAtlases(SpriteAtlas[] spriteAtlases)
+    {
+        SpriteAtlasUtility.PackAtlases(spriteAtlases, EditorUserBuildSettings.activeBuildTarget);
     }
 
     /// <summary>
@@ -257,36 +268,8 @@ public static class AtlasMaintainerHelpers
 
 #endregion
 
-    /// <summary>
-    /// Searches for a given sprite name in the given atlases or all the atlases in the project if no atlas is provided.
-    /// </summary>
-    /// <param name="spriteName">sprite name to search</param>
-    /// <param name="candidateAtlases">Atlases to search for</param>
-    public static SpriteAtlas[] GetSpriteAtlasesOrEmpty(Sprite sprite, SpriteAtlas[] candidateAtlases = null)
-    {
-        SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
-        List<SpriteAtlas> result = new();
-    
-        if (candidateAtlases == null)
-            TryGetAllAtlases(out candidateAtlases);
-            
-        if (candidateAtlases == null)
-        {
-            Debug.LogWarning("No atlas found in the project!");
-            return result.ToArray();
-        }
-            
-        for (int i = 0; i < candidateAtlases.Length; i++)
-        {
-            if (!candidateAtlases[i].CanBindTo(sprite))
-                continue;
+    #region Validation
 
-            result.Add(candidateAtlases[i]);
-        }
-
-        return result.ToArray();
-    }
-    
     /// <summary>
     /// Checks if the given object is a texture2D and texture type is Sprite.
     /// </summary>
@@ -345,6 +328,38 @@ public static class AtlasMaintainerHelpers
         string assetPath = AssetDatabase.GetAssetPath(targetObject);
 
         return AssetDatabase.IsValidFolder(assetPath);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Searches for a given sprite name in the given atlases or all the atlases in the project if no atlas is provided.
+    /// </summary>
+    /// <param name="spriteName">sprite name to search</param>
+    /// <param name="candidateAtlases">Atlases to search for</param>
+    public static SpriteAtlas[] GetSpriteAtlasesOrEmpty(Sprite sprite, SpriteAtlas[] candidateAtlases = null)
+    {
+        SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget);
+        List<SpriteAtlas> result = new();
+
+        if (candidateAtlases == null)
+            TryGetAllAtlases(out candidateAtlases);
+
+        if (candidateAtlases == null)
+        {
+            Debug.LogWarning("No atlas found in the project!");
+            return result.ToArray();
+        }
+
+        for (int i = 0; i < candidateAtlases.Length; i++)
+        {
+            if (!candidateAtlases[i].CanBindTo(sprite))
+                continue;
+
+            result.Add(candidateAtlases[i]);
+        }
+
+        return result.ToArray();
     }
 
     /// <summary>

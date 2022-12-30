@@ -1,0 +1,15 @@
+Toolbar
+{
+	height: 35;
+}
+
+TextField
+{
+	padding: 4;
+}
+
+Button
+{
+	margin: 4;
+	max-height: 25;
+}

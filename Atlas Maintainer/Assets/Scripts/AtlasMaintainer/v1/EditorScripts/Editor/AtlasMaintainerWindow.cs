@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UIElements;
 
+[Obsolete]
 public class AtlasMaintainerWindow : EditorWindow
 {
     private OperationsController operationsController;
@@ -12,7 +14,6 @@ public class AtlasMaintainerWindow : EditorWindow
 
     private VisualElement assetPreview;
 
-    [MenuItem("Assets/Atlas Maintainer/Open in Atlas Maintainer", true)]
     private static bool ValidateCanOpenInAtlasMaintainer()
     {
         return AtlasMaintainerHelpers.ValidateSprite(Selection.activeObject)
@@ -20,7 +21,6 @@ public class AtlasMaintainerWindow : EditorWindow
             || AtlasMaintainerHelpers.ValidateFolder(Selection.activeObject);
     }
 
-    [MenuItem("Assets/Atlas Maintainer/Open in Atlas Maintainer")]
     private static void OpenInAtlasMaintainer()
     {
         GenerateWindow();
@@ -55,7 +55,7 @@ public class AtlasMaintainerWindow : EditorWindow
     private void GenerateLayoutFromUXML(VisualElement root)
     {
         VisualTreeAsset visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
-            "Assets/Scripts/AtlasMaintainer/EditorWindow/AtlasMaintainerWindow.uxml");
+            "Assets/Scripts/AtlasMaintainer/v1/EditorWindow/AtlasMaintainerWindow.uxml");
 
         VisualElement labelFromUXML = visualTree.Instantiate();
         root.Add(labelFromUXML);
