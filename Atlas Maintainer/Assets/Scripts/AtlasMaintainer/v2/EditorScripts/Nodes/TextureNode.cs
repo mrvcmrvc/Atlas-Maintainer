@@ -17,6 +17,10 @@ public class TextureNode : NodeBase<TextureNodeData>
 
     protected override string headerText { get; set; } = "Empty Texture Node";
 
+    public TextureNode(GraphView view) : base(view)
+    {
+    }
+
     protected override void InitialiseCustomActions(TextureNodeData nodeData)
     {
         if (nodeData.Sprite != null)

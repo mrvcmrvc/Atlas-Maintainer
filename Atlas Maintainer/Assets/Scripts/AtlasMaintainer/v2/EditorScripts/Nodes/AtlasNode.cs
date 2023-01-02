@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -20,6 +21,10 @@ public class AtlasNode : NodeBase<AtlasNodeData>
     protected override Sprite previewSprite { get; set; } = null;
 
     protected override string headerText { get; set; } = "Empty Atlas Node";
+
+    public AtlasNode(GraphView view) : base(view)
+    {
+    }
 
     protected override void InitialiseCustomActions(AtlasNodeData nodeData)
     {
@@ -44,6 +49,13 @@ public class AtlasNode : NodeBase<AtlasNodeData>
         header.value = headerText;
 
         titleContainer.Insert(0, header);
+
+        header.RegisterValueChangedCallback(OnNodeNameChanged);
+    }
+
+    private void OnNodeNameChanged(ChangeEvent<string> changeEvent)
+    {
+        headerText = changeEvent.newValue;
     }
 
     private void CreateDeleteButton()
@@ -81,9 +93,20 @@ public class AtlasNode : NodeBase<AtlasNodeData>
         SpriteAtlas spriteAtlas = ((AtlasNodeData)userData).SpriteAtlas;
 
         if (spriteAtlas == null)
-            AtlasMaintainerHelpers.CreateAtlas(headerText, GetConnectedSprites());
+        {
+            spriteAtlas = AtlasMaintainerHelpers.CreateAtlas(headerText, GetConnectedSprites());
+            userData = new AtlasNodeData(spriteAtlas, ((AtlasNodeData)userData).NodePosition);
+        }
         else
+        {
+            if (!string.Equals(headerText, spriteAtlas.name))
+            {
+                //TODO: Update atlas name by using UnityEditor.AssetDatabase.RenameAsset(); through AtlasMaintainerHelpers
+                //spriteAtlas.name = headerText;
+            }
+
             AtlasMaintainerHelpers.PackAtlases(new[] { spriteAtlas });
+        }
     }
 
     private Sprite[] GetConnectedSprites()
@@ -104,6 +127,20 @@ public class AtlasNode : NodeBase<AtlasNodeData>
 
     private void DeleteAtlas()
     {
-        AtlasMaintainerHelpers.DeleteAtlases(new[] { ((AtlasNodeData)userData).SpriteAtlas });
+        AtlasMaintainerHelpers.TryDeleteAtlases(new[] { ((AtlasNodeData)userData).SpriteAtlas }, out bool[] result);
+
+        if (result[0])
+        {
+            List<Edge> edges = InputPort.connections.ToList();
+            foreach (Edge edge in edges)
+            {
+                edge.output.Disconnect(edge);
+                edge.input.Disconnect(edge);
+
+                edge.parent.Remove(edge);
+            }
+            
+            graphView.RemoveElement(this);
+        }
     }
 }

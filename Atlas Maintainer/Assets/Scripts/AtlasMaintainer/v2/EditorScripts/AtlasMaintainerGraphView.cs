@@ -88,7 +88,7 @@ public class AtlasMaintainerGraphView : GraphView
 
     private TextureNode AddTextureNode(TextureNodeData textureNodeData)
     {
-        TextureNode newNode = new();
+        TextureNode newNode = new(this);
         newNode.Initialise(textureNodeData);
         newNode.Draw();
         AddElement(newNode);
@@ -130,7 +130,7 @@ public class AtlasMaintainerGraphView : GraphView
 
     public AtlasNode AddAtlasNode(AtlasNodeData atlasNodeData)
     {
-        AtlasNode newNode = new();
+        AtlasNode newNode = new(this);
         newNode.Initialise(atlasNodeData);
         newNode.Draw();
         AddElement(newNode);

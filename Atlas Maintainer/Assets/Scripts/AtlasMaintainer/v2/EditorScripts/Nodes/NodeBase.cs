@@ -21,6 +21,13 @@ public abstract class NodeBase : Node
     protected abstract Sprite previewSprite { get; set; }
     protected abstract string headerText { get; set; }
 
+    protected GraphView graphView;
+
+    public NodeBase(GraphView view)
+    {
+        graphView = view;
+    }
+
     public virtual void Draw()
     {
         CreateHeader();
@@ -94,6 +101,10 @@ public abstract class NodeBase : Node
 public abstract class NodeBase<T> : NodeBase where
     T : NodeData
 {
+    public NodeBase(GraphView view) : base(view)
+    {
+    }
+
     public void Initialise(T nodeData)
     {
         userData = nodeData;

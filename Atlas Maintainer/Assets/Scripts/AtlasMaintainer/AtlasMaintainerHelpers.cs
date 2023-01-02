@@ -96,47 +96,49 @@ public static class AtlasMaintainerHelpers
 
     #region Edit Functions
 
-    /// <summary>
-    /// Not implemented yet!
-    /// </summary>
+    //TODO: Make path configurable
     public static SpriteAtlas CreateAtlas(string atlasName, Object[] objects)
     {
-        throw new NotImplementedException();
-
         SpriteAtlas spriteAtlas = new();
-        spriteAtlas.Add(objects);
 
         if (!Directory.Exists("Assets/Textures/Atlases"))
             Directory.CreateDirectory("Assets/Textures/Atlases");
             
-        AssetDatabase.CreateAsset(spriteAtlas, "Assets/Textures/Atlases/GeneratedAtlas.spriteatlas");
-        AssetDatabase.SaveAssets();
+        AssetDatabase.CreateAsset(spriteAtlas, $"Assets/Textures/Atlases/{atlasName}.spriteatlas");
+
+        AddAssetsToAtlas(spriteAtlas, objects, true);
 
         return spriteAtlas;
     }
 
-    /// <summary>
-    /// Not implemented yet!
-    /// </summary>
-    public static void DeleteAtlases(SpriteAtlas[] atlasesToDelete)
+    public static void TryDeleteAtlases(SpriteAtlas[] atlasesToDelete, out bool[] result)
     {
-        throw new NotImplementedException();
+        result = new bool[atlasesToDelete.Length];
 
-        List<string> failedPaths = new();
-        AssetDatabase.DeleteAssets(new[]{
-            "Assets/Textures/Atlases/GeneratedAtlas.spriteatlas",
-        }, failedPaths);
-            
-        if (failedPaths.Count == 0)
+        for (int i = 0; i < atlasesToDelete.Length; i++)
+        {
+            string assetRelativePath = AssetDatabase.GetAssetPath(atlasesToDelete[i]);
+
+            List<string> failedPaths = new();
+            AssetDatabase.DeleteAssets(new[]{ assetRelativePath }, failedPaths);
+
+            if (failedPaths.Count == 0)
+            {
+                result[i] = true;
+                return;
+            }
+
+            for (int x = 0; x < failedPaths.Count; x++)
+                Debug.LogWarning($"Failed to remove the asset at { failedPaths[x] }");
+
+            result[i] = false;
             return;
-    
-        for (int i = 0; i < failedPaths.Count; i++)
-            Debug.LogWarning($"Failed to remove the asset at {failedPaths[i]}");
+        }
     }
 
     #endregion
 
-#region Add & Remove Functions
+    #region Add & Remove Functions
     /// <summary>
     /// Adds the given objects to the atlas provided.
     /// </summary>
