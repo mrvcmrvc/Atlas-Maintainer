@@ -100,10 +100,7 @@ public class AtlasNode : NodeBase<AtlasNodeData>
         else
         {
             if (!string.Equals(headerText, spriteAtlas.name))
-            {
-                //TODO: Update atlas name by using UnityEditor.AssetDatabase.RenameAsset(); through AtlasMaintainerHelpers
-                //spriteAtlas.name = headerText;
-            }
+                AtlasMaintainerHelpers.RenameAtlas(spriteAtlas, headerText);
 
             AtlasMaintainerHelpers.PackAtlases(new[] { spriteAtlas });
         }

@@ -136,6 +136,12 @@ public static class AtlasMaintainerHelpers
         }
     }
 
+    public static void RenameAtlas(SpriteAtlas atlas, string newName)
+    {
+        string path = AssetDatabase.GetAssetPath(atlas);
+        AssetDatabase.RenameAsset(path, newName);
+    }
+
     #endregion
 
     #region Add & Remove Functions
@@ -143,7 +149,7 @@ public static class AtlasMaintainerHelpers
     /// Adds the given objects to the atlas provided.
     /// </summary>
     /// <param name="spriteAtlas">Target atlas to add assets to.</param>
-    /// <param name="objects">Objects to add. This can be any texture2D, sprites, or folders;</param>
+    /// <param name="objects">Objects to add. This can be any texture2D, sprites, or folders.</param>
     /// <param name="packAtlas">Whether to re-pack the atlas or not. Changes will not be visible until the re-pack.</param>
     public static void AddAssetsToAtlas(SpriteAtlas spriteAtlas, Object[] objects,  bool packAtlas = false)
     {
@@ -155,7 +161,10 @@ public static class AtlasMaintainerHelpers
             if (packables.Contains(objects[i]))
                 continue;
 
-            newObjects.Add(objects[i]);
+            if (objects[i] is Sprite sprite)
+                newObjects.Add(sprite.texture);
+            else
+                newObjects.Add(objects[i]);
         }
 
         spriteAtlas.Add(newObjects.ToArray());
@@ -168,7 +177,7 @@ public static class AtlasMaintainerHelpers
     /// Removes the given objects from the atlas provided.
     /// </summary>
     /// <param name="spriteAtlas">Target atlas to remove assets from.</param>
-    /// <param name="objects">Objects to remove. This can be any texture2D, sprites, or folders;</param>
+    /// <param name="objects">Objects to remove. This can be any texture2D, sprites, or folders.</param>
     /// <param name="packAtlas">Whether to re-pack the atlas or not. Changes will not be visible until the re-pack.</param>
     public static void RemoveAssetsFromAtlas(SpriteAtlas spriteAtlas, Object[] objects, bool packAtlas = false)
     {

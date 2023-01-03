@@ -27,8 +27,9 @@ public class AtlasMaintainerEditorWindow : EditorWindow
 
     private static void GenerateWindow()
     {
-        AtlasMaintainerEditorWindow window = GetWindow<AtlasMaintainerEditorWindow>();
+        AtlasMaintainerEditorWindow window = CreateInstance<AtlasMaintainerEditorWindow>();
         window.titleContent = new GUIContent("Atlas Maintainer");
+        window.Show();
     }
 
     public void CreateGUI()
