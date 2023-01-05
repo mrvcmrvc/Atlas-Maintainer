@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UIElements;
-
+ 
 public class AtlasNodeData : NodeData
 {
     public SpriteAtlas SpriteAtlas { get; }
@@ -41,6 +42,14 @@ public class AtlasNode : NodeBase<AtlasNodeData>
         //CreatePaginationButtons();
         CreatePackButton();
         CreateDeleteButton();
+
+        RegisterCallback<MouseDownEvent>(OnMouseDown, TrickleDown.NoTrickleDown);
+    }
+
+    private void OnMouseDown(MouseDownEvent evt)
+    {
+        if (evt.tricklesDown && evt.clickCount == 2)
+            EditorGUIUtility.PingObject(((AtlasNodeData)userData).SpriteAtlas);
     }
 
     protected override void CreateHeader()
